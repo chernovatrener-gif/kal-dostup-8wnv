@@ -493,7 +493,7 @@ function setHero(n) {
 
 
 // ===== доступ: дата сохраняется один раз =====
-const CAL_FILES = {1:'Personal_Numerology_Calendar_2027_06-02.pdf',2:'Personal_Numerology_Calendar_2027_07-02.pdf',3:'Personal_Numerology_Calendar_2027_08-02.pdf',4:'Personal_Numerology_Calendar_2027_09-02.pdf',5:'Personal_Numerology_Calendar_2027_10-02.pdf',6:'Personal_Numerology_Calendar_2027_11-02.pdf',7:'Personal_Numerology_Calendar_2027.pdf',8:'Personal_Numerology_Calendar_2027_12-03.pdf',9:'Personal_Numerology_Calendar_2027_13-03.pdf'};
+const CAL_FILES = {1:'Personal Numerology Calendar 2027 06-02.pdf',2:'Personal Numerology Calendar 2027 07-02.pdf',3:'Personal Numerology Calendar 2027 08-02.pdf',4:'Personal Numerology Calendar 2027 09-02.pdf',5:'Personal Numerology Calendar 2027 10-02.pdf',6:'Personal Numerology Calendar 2027 11-02.pdf',7:'Personal Numerology Calendar 2027.pdf',8:'Personal Numerology Calendar 2027 12-03.pdf',9:'Personal Numerology Calendar 2027 13-03.pdf'};
 const KEY = 'podbor_birth_v1';
 const ACCESS_UNTIL = new Date(2027, 11, 31, 23, 59, 59);
 const store = {
@@ -512,7 +512,7 @@ function unlock(b, str) {
   setHero(py);
   $('yrSvg').innerHTML = ringSvg(py).replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '');
   $('yrT').textContent = 'Ваш личный год 2027: ' + py + ' — ' + YEAR_TITLE[py];
-  $('pdf').href = CAL_FILES[py];
+  $('pdf').href = encodeURIComponent(CAL_FILES[py]);
   $('yearBox').hidden = false; $('f').hidden = false; $('finderTitle').hidden = false;
 }
 if (new Date() > ACCESS_UNTIL) { $('closed').hidden = false; $('app').hidden = true; $('until').hidden = true; }
