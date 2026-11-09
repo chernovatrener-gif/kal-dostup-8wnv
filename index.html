@@ -131,6 +131,16 @@ h2.sec { font-family: var(--serif); font-size: 22px; margin: 26px 4px 12px; }
 .mh.soft { margin-top: 28px; }
 .more.soft { background: var(--card); border: 1px dashed var(--gold-line); border-radius: 14px; padding: 10px 12px; margin: 0 0 10px; line-height: 1.8; }
 .more.soft span:not(.chip) { color: var(--ink-soft); font-size: 13px; }
+
+.yearinfo { margin: -6px 0 18px; padding: 14px; border-radius: 14px; background: var(--sage-bg); }
+.yearbox { display: flex; gap: 14px; align-items: center; }
+.yearbox svg { flex: none; width: 64px; height: 64px; }
+.yearbox .t { font-family: var(--serif); font-size: 18px; font-weight: 700; line-height: 1.25; }
+.yearbox .s { color: var(--ink); font-size: 14.5px; margin-top: 3px; line-height: 1.45; }
+.yearinfo .hint { margin: 10px 0 0; }
+.yearinfo .nine { color: var(--ink); }
+.bonus { margin: 6px 0 12px; }
+.bonus h2 { font-family: var(--serif); font-size: 21px; margin: 0 0 2px; }
 </style>
 </head>
 <body>
@@ -169,7 +179,7 @@ h2.sec { font-family: var(--serif); font-size: 22px; margin: 26px 4px 12px; }
     </section>
 
     <section class="card" id="yearBox" hidden>
-      <div class="yearline"><svg id="yrSvg" viewBox="0 0 76 76" aria-hidden="true"></svg><div><div class="t" id="yrT"></div><div class="s">Календарь на 2027 год: каждый день с личным и общим днём, описание года и месяцев.</div></div></div>
+      <div class="yearline"><svg id="yrSvg" viewBox="0 0 76 76" aria-hidden="true"></svg><div><div class="t" id="yrT"></div><div class="s" id="yrS"></div></div></div>
       <a class="go" id="pdf" href="#" download>Скачать мой календарь (PDF)</a>
     </section>
 
@@ -233,6 +243,19 @@ const MONTH_INFO = {
   8: { name: 'Месяц труда', focus: 'доводить дела до результата, наводить порядок, работать объективно' },
   9: { name: 'Месяц завершения', focus: 'заботиться о здоровье, помогать без ожиданий, завершать циклы' }
 };
+
+// короткое положительное описание личного года (по описаниям из календаря)
+const YEAR_BLURB = {
+  1: 'Год новых начинаний: время смелых идей, проектов и лидерства. Закладывается фундамент на ближайшие девять лет.',
+  2: 'Год мягкости и партнёрства: хорошо укреплять связи, договариваться, развивать чуткость и интуицию.',
+  3: 'Год роста и расширения: усилия прошлых лет приносят плоды, растут знания, влияние и возможности.',
+  4: 'Год, когда можно мечтать, ставить цели и выстраивать новое будущее. Жизнь говорит знаками и совпадениями, а перемены ведут к росту.',
+  5: 'Год слов и знакомств: открываются новые связи и возможности, расширяются границы, тайное становится явным, и проще увидеть правду.',
+  6: 'Год гармонии и внутреннего сияния: жизнь вознаграждает за прежние усилия, желания исполняются, в отношениях больше любви и красоты.',
+  7: 'Год внутреннего поиска и интуиции: время услышать себя, освободиться от лишнего и заложить фундамент будущих побед.',
+  8: 'Год зрелости и результата: труд превращается в результат, опыт в капитал, приходят стабильность и профессионализм.',
+  9: 'Год очищения и зрелости: завершается цикл, уходит лишнее, наводится порядок в теле, делах и отношениях, освобождая место новому.'
+};
 const DAY_LINE = {
   3: 'Общий день 3 — сильный день для решений: работает энергия анализа и стратегии.',
   6: 'Общий день 6 — день мудрости и удачных договорённостей.',
@@ -269,6 +292,14 @@ const SCEN = {
     neutralText: 'В вашем личном году регистрация ИП возможна в этом месяце, но если время терпит, лучше дождаться идеального периода: личных годов 1, 3, 5 или 6.',
     badText: 'Для регистрации ИП этот период не рекомендован: в личный год 9 лучше подождать следующего года, а в годы 2, 4, 7 и 8 подходят только личные месяцы 1, 3, 5, 6 и 8. Если ждать нельзя, это лучший из возможных дней.',
     waitText: 'В выбранный период регистрировать ИП не рекомендовано: в личный год 9 лучше подождать следующего года, а в годы 2, 4, 7 и 8 подходят только личные месяцы 1, 3, 5, 6 и 8. Если ждать нельзя, включите «Срочно и важно».' },
+  interview: { name: 'Пройти собеседование', days: [6, 3, 8], monthBad: [2, 7, 9],
+    why: 'Хороший день для собеседования.' },
+  tickets: { name: 'Купить билеты', days: [6, 3, 8], monthBad: [2, 4, 7], monthNeutral: [1, 5], prefMonths: [3, 6, 8],
+    why: 'Хорошо покупать билеты в этот день (это день покупки, не поездки).' },
+  cosmetic: { name: 'Пойти к косметологу', days: [6, 3, 8], monthBad: [4, 7], years: { C: [7] }, condMonths: [3, 6, 8], prefMonths: [3, 6, 8],
+    why: 'Хороший день для процедуры. Если время назначил специалист, ориентируйтесь и на его рекомендации.',
+    yearNeutralText: 'В личный год 7 процедуры допустимы только в месяцы 3, 6 и 8 и в общие дни 3, 6 и 8. Если запись нельзя перенести, делаем в этот день.',
+    badText: 'Месяц не самый благоприятный. Если запись нельзя перенести, делаем в этот день. Если можно, лучше выбрать более благоприятный месяц.' },
   wedding: { name: 'Свадьба', days: [6, 3, 8], monthBad: [7, 9], hardYears: [8], urgentWindow: { months: [3, 6], days: [3, 6] }, partner: true,
     years: { C: [9] }, lateYear: { 9: 10 },
     yearNeutralText: 'В личный год 9 свадьбу хорошо бы отложить. Подходят только лучшие месяцы и общие дни 3, 6, 8. Если хотите супер идеально, дождитесь октября или года 1.',
@@ -619,6 +650,14 @@ function setHero(n) {
   el.textContent = n; el.setAttribute('font-size', long ? 30 : 46); el.setAttribute('y', long ? 96 : 100);
 }
 
+// карточка личного года: показывается сразу после ввода даты рождения
+function yearInfoHtml(b) {
+  const py = personalYear(b.d, b.m, 2027);
+  let h = '<div class="yearbox">' + ringSvg(py) + '<div><div class="t">Личный год на 2027: ' + py + ' — ' + YEAR_TITLE[py] + '</div><div class="s">' + YEAR_BLURB[py] + '</div></div></div>';
+  if (b.y <= 2008) h += '<p class="hint nine">Такой же личный год был 9 лет назад, в 2018. Вспомни 2–3 события того года и сравни с описанием в календаре.</p>';
+  return h + '<p class="hint">Подробно о годе, о каждом месяце и дне — в календаре.</p>';
+}
+
 
 // ===== доступ: дата сохраняется один раз =====
 const CAL_FILES = {1:'Personal Numerology Calendar 2027 06-02.pdf',2:'Personal Numerology Calendar 2027 07-02.pdf',3:'Personal Numerology Calendar 2027 08-02.pdf',4:'Personal Numerology Calendar 2027 09-02.pdf',5:'Personal Numerology Calendar 2027 10-02.pdf',6:'Personal Numerology Calendar 2027 11-02.pdf',7:'Personal Numerology Calendar 2027.pdf',8:'Personal Numerology Calendar 2027 12-03.pdf',9:'Personal Numerology Calendar 2027 13-03.pdf'};
@@ -662,6 +701,7 @@ function unlock(b, str) {
   setHero(py);
   $('yrSvg').innerHTML = ringSvg(py).replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '');
   $('yrT').textContent = 'Ваш личный год 2027: ' + py + ' — ' + YEAR_TITLE[py];
+  $('yrS').textContent = YEAR_BLURB[py] + ' Календарь на 2027 год: каждый день с личным и общим днём.';
   $('pdf').href = encodeURIComponent(CAL_FILES[py]);
   $('yearBox').hidden = false; $('voices').hidden = !VOICES.some((v, i) => !$('voiceList').children[i].hidden); $('f').hidden = false; $('finderTitle').hidden = false;
 }
